@@ -1,4 +1,6 @@
-TARGET := iphone:clang:latest:14.0
+TARGET := iphone:clang:latest:15.0
+# أو حتى:
+TARGET := iphone:clang:latest:16.0
 INSTALL_TARGET_PROCESSES = LastIsland
 
 include $(THEOS)/makefiles/common.mk
