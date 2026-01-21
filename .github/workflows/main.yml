@@ -8,11 +8,9 @@ jobs:
     runs-on: macos-latest
 
     steps:
-      # 1) كود مشروعك (التويك)
       - name: Checkout tweak repository
         uses: actions/checkout@v4
       
-      # 2) تحميل Theos في مجلد theos/
       - name: Checkout Theos
         uses: actions/checkout@v4
         with:
@@ -20,22 +18,27 @@ jobs:
           path: theos
           submodules: recursive
       
-      # 3) تعريف متغير THEOS وإضافة bin للـ PATH
       - name: Setup THEOS env
         run: |
           echo "THEOS=$GITHUB_WORKSPACE/theos" >> $GITHUB_ENV
           echo "$GITHUB_WORKSPACE/theos/bin" >> $GITHUB_PATH
 
-      # 4) تحميل الـ SDK و البناء
       - name: Build
         run: |
-          # حذف مجلد sdks الذي يجي مع theos عشان ما يسبب مشكلة لـ git clone
+          # حذف مجلد SDK القديم
           rm -rf "$THEOS/sdks"
+          
+          # استخدام SDK أحدث (iOS 16.4)
           git clone --depth=1 https://github.com/xybp888/iOS-SDKs "$THEOS/sdks"
-          mv "$THEOS/sdks/iPhoneOS14.5.sdk" "$THEOS/sdks/iPhoneOS.sdk"
+          mv "$THEOS/sdks/iPhoneOS16.4.sdk" "$THEOS/sdks/iPhoneOS.sdk"
+          
+          # تأكد من وجود UIKit
+          echo "Checking SDK structure:"
+          ls -la "$THEOS/sdks/iPhoneOS.sdk/System/Library/Frameworks/" | grep UIKit || echo "UIKit not found!"
+          
+          # البناء
           make package FINALPACKAGE=1
           
-      # 5) رفع ملف deb الناتج
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
